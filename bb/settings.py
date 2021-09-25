@@ -15,6 +15,7 @@ from pathlib import Path
 
 # from pymongo import MongoClient
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+import dj_database_url
 from telegram.ext import Updater
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -87,7 +88,8 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-
+db_from_env = dj_database_url.config(conn_max_age=600)
+DATABASES['default'].update(db_from_env)
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -123,7 +125,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+#location where django collect all static files
+STATIC_ROOT = os.path.join(BASE_DIR,'static')
+# location where you will store your static files
+STATICFILES_DIRS = [os.path.join(BASE_DIR,'project_name/static')
+]
 
+MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+MEDIA_URL = '/media/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
