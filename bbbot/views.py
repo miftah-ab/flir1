@@ -2,6 +2,7 @@ import json
 import os
 
 import requests
+from django.http import HttpResponse
 from telegram import Update, Bot
 from telegram.ext import CallbackContext, CommandHandler, Updater
 
@@ -16,6 +17,10 @@ class RegisterView(CreateView):
     model = User
     form_class = RegisterForm
     # try with bot.setting send message
+
+
+def hello(views, ):
+    return HttpResponse('juij')
 
 
 def start(update: Update, context: CallbackContext):
