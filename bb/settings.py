@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
-
 # from pymongo import MongoClient
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 import dj_database_url
@@ -29,12 +28,14 @@ SECRET_KEY = 'django-insecure-eo$^k4kmp)-!rr92hs9c(*96(!)rd664w@es00e9e&k-r73@^t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://dj-botq.herokuapp.com/']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'https://dj-botq.herokuapp.com/']
 
 # Application definition
 
 INSTALLED_APPS = [
     'bbbot.apps.BbbotConfig',
+    'tgdel',
+    'tgdelo',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'whitenoise.runserver_nostatic',
+    'django.contrib.postgres',
+    'cities_light',
 ]
 
 MIDDLEWARE = [
@@ -126,13 +129,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-#location where django collect all static files
-STATIC_ROOT = os.path.join(BASE_DIR,'static')
+# location where django collect all static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # location where you will store your static files
-STATICFILES_DIRS = [os.path.join(BASE_DIR,'project_name/static')
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'project_name/static')
+                    ]
 
-MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -142,3 +145,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # updater = Updater("1900859603:AAE3wfQth3zd2G0g7pGoKcD8Anxwfdth5Gk", use_context=True)
 TOKEN = '1900859603:AAE3wfQth3zd2G0g7pGoKcD8Anxwfdth5Gk'
 PORT = int(os.environ.get('PORT', '8443'))
+
+CITIES_LIGHT_TRANSLATION_LANGUAGES = ['am', 'es', 'en', 'fr', 'abbr']
+CITIES_LIGHT_INCLUDE_COUNTRIES = ['ET']
+CITIES_LIGHT_INCLUDE_CITY_TYPES = ['PPL', 'PPLA', 'PPLA2', 'PPLA3', 'PPLA4', 'PPLC', 'PPLF', 'PPLG', 'PPLL', 'PPLR',
+                                   'PPLS', 'STLMT', ]
+# CITIES_LIGHT_CITY_SOURCES = ['http://download.geonames.org/export/dump/cities1000.zip ']
+CITIES_LIGHT_TRANSLATION_SOURCES = ['http://download.geonames.org/export/dump/alternateNamesV2.zip']

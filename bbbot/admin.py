@@ -1,13 +1,41 @@
 from django.contrib import admin
-from .models import  User
+from .models import User, Message, Profile, BotUser,Likes
 
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = [
-        'user_id', 'username', 'first_name', 'last_name',
+        'Tuser_id', 'username', 'first_name', 'last_name', 'phone', 'age', 'gender', 'lat', 'lon', 'language_code',
 
         'created_at', 'updated_at',
     ]
     # list_filter = ["is_blocked_bot", "is_moderator"]
-    search_fields = ('username', 'user_id')
+    search_fields = ('username', 'Tuser_id')
+
+
+@admin.register(BotUser)
+class UserAdmin(admin.ModelAdmin):
+    list_display = [
+        'user_id', 'username', 'first_name','phone', 'last_name', 'age', 'gender', 'location'
+    ]
+
+#admin.site.register(Likes)
+
+@admin.register(Likes)
+class UserAdmin(admin.ModelAdmin):
+    list_display = [
+        'user_from', 'user_to', 'created'
+    ]
+
+@admin.register(Profile)
+class UserAdmin(admin.ModelAdmin):
+    list_display = [
+        'buser', 'age', 'gender', 'location'
+    ]
+
+
+@admin.register(Message)
+class UserAdmin(admin.ModelAdmin):
+    list_display = [
+        'user', 'text', 'chat_id', 'message_id'
+    ]
