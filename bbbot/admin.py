@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Message, Profile, BotUser,Likes
+from .models import User, Message, Profile, BotUser,Likess
 
 
 @admin.register(User)
@@ -16,15 +16,15 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(BotUser)
 class UserAdmin(admin.ModelAdmin):
     list_display = [
-        'user_id', 'username', 'first_name','phone', 'last_name', 'age', 'gender', 'location'
+        'user_id', 'username', 'first_name','phone', 'last_name', 'age', 'gender', 'liked','liked_by','location'
     ]
 
 #admin.site.register(Likes)
 
-@admin.register(Likes)
+@admin.register(Likess)
 class UserAdmin(admin.ModelAdmin):
     list_display = [
-        'user_from', 'user_to', 'created'
+        'user_from', 'user_to', 'like_id', 'liked', 'created'
     ]
 
 @admin.register(Profile)

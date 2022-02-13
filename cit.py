@@ -1,3 +1,7 @@
+xx = '1256442'
+print(xx[0:1])
+
+
 for x in range(5):
     # print(x) print random number
     inn = input('P  OR  N   ').lower()

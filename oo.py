@@ -9,15 +9,25 @@ li = ['a', 'b', 'c', 'd']
 di = {'a': 'aa', 'b': 'bb', 'c': 'cc', 'd': 'dd'}
 
 
+# if , continue
 def ci():
-    q = input('enter name   ')
-    city = City.objects.filter(name__istartswith=q)
+    age  = int(input('age   '))
+    try:
+        age = int(age)
+        if age > 10 and age < 100:
+            print('True')
+            return True
+        print('False')
+        return False
+    except:
+        return False
+    q = input('enter name of city  ')
+    # city = City.objects.filter(name__istartswith=q)
+    city = City.objects.filter(alternate_names__istartswith=q)
     co = Country.objects.filter(name__istartswith=q)
     re = Region.objects.filter(name__istartswith=q)
     coun = city.count()
-    print(co)
-    print(re)
-    print(coun)
+    print(f' {coun} city found  ')
     global al
     al = {}
     for x in range(1, coun + 1):
@@ -26,8 +36,8 @@ def ci():
             print(f'{x}, {y}')
             x = x + 1
         break
-    print(al.keys())
-    print(al.values())
+    # print(al.keys())
+    # print(al.values())
     inp = int(input('Select City   '))
     if inp in al.keys():
         print(f'your city is {al[inp]}')

@@ -146,9 +146,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 TOKEN = '1900859603:AAE3wfQth3zd2G0g7pGoKcD8Anxwfdth5Gk'
 PORT = int(os.environ.get('PORT', '8443'))
 
-CITIES_LIGHT_TRANSLATION_LANGUAGES = ['am', 'es', 'en', 'fr', 'abbr']
+
+CITIES_LIGHT_TRANSLATION_LANGUAGES = ['en', 'fr', 'abbr']
 CITIES_LIGHT_INCLUDE_COUNTRIES = ['ET']
 CITIES_LIGHT_INCLUDE_CITY_TYPES = ['PPL', 'PPLA', 'PPLA2', 'PPLA3', 'PPLA4', 'PPLC', 'PPLF', 'PPLG', 'PPLL', 'PPLR',
                                    'PPLS', 'STLMT', ]
-# CITIES_LIGHT_CITY_SOURCES = ['http://download.geonames.org/export/dump/cities1000.zip ']
+CITIES_LIGHT_CITY_SOURCES = ['http://download.geonames.org/export/dump/cities1000.zip ']
 CITIES_LIGHT_TRANSLATION_SOURCES = ['http://download.geonames.org/export/dump/alternateNamesV2.zip']

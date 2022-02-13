@@ -7,6 +7,7 @@ import telegram
 from telegram import Update, ForceReply, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler, \
     PicklePersistence
+from telegram.utils import helpers
 # from  ptbcontrib.postgres_persistence import  P
 import os
 import django
@@ -14,7 +15,7 @@ import django
 os.environ['DJANGO_SETTINGS_MODULE'] = 'bb.settings'
 django.setup()
 
-from bbbot.models import BotUser, Likes
+from bbbot.models import BotUser, Likess
 from bbbot.helper import set_user, MessageCreationView, set_profile, set_bot_user
 from cities_light.models import City
 
@@ -22,7 +23,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-GENDER, AGE, LOCATION, PHONE = range(4)
+GENDER, AGE, LOCATION, LOCATION2, PHONE = range(5)
 
 
 def facts_to_str(user_data: Dict[str, str]) -> str:
@@ -100,10 +101,56 @@ def age(update: Update, context: CallbackContext) -> int:
     return LOCATION
 
 
+al = {}
+
+
 def location(update: Update, context: CallbackContext) -> int:
     text = update.message.text.lower()
-    context.user_data['location'] = text
+    # context.user_data['location'] = text
     user = update.message.from_user
+
+    city = City.objects.filter(alternate_names__istartswith=text)
+    global coun
+    coun = city.count()
+    print(f' {coun} city found  ')
+    global al
+    al = {}
+    num = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣']
+    ind = 0
+    for x in range(1, coun + 1):
+        # for x in num:
+        for y in city:
+            al[x] = y
+            print(f'{x}, {y}')
+            update.message.reply_text(f'{x}, {y}')
+            x = x + 1
+            # x = x[ind]
+
+        break
+
+    inpp = [['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣']]
+    reply_markup = ReplyKeyboardMarkup(inpp, resize_keyboard=True)
+    update.message.reply_text('choose ', reply_markup=reply_markup)
+    # inp = int(input('Select City   '))   # use function
+
+    return LOCATION2
+
+
+def location2(update: Update, context: CallbackContext) -> int:
+    text = update.message.text
+    user = update.message.from_user
+    # inp = update.message.text
+
+    inp = int(update.message.text)
+    if inp in al.keys():
+        print(f'your city is {al[inp]}')
+        update.message.reply_text(f'your city is {al[inp]}')
+        context.user_data['location'] = al[inp]
+    else:
+        # while inp >= coun or inp == 0:
+        print('Wrong Input select Again')
+        update.message.reply_text(f'Wrong Input select Againnnnn')
+
     logger.info("City of %s: %s", user.first_name, update.message.text)
     location_keyb = KeyboardButton(text='Share Contact', request_contact=True)
     loc_keyb = [[location_keyb]]
@@ -119,7 +166,7 @@ def phone(update: Update, context: CallbackContext) -> int:
     # context.user_data['choice'] = text
     user = update.message.from_user
     logger.info("Phone of %s: %s", user.first_name, update.message.text)
-    update.message.reply_text(context.user_data)
+    #    update.message.reply_text(context.user_data)   #cause object of type city is not json serializable error
     set_bot_user(update, context)  # /************
     update.message.reply_text(
         'Congratulation !! FINISHED \n'
@@ -181,7 +228,7 @@ def stories(update: Update, context: CallbackContext) -> None:
         print(z.gender)
         print(z.first_name) """
     if z.gender == 'boy':  # y['gender'] this is not filter by db it's by pickle file
-        for stories_user in BotUser.objects.filter(gender='boy'):
+        for stories_user in BotUser.objects.filter(gender='boy').exclude(user_id=z.user_id):
             # vv = BotUser.objects.filter()
             print(stories_user)
             print(stories_user.gender)
@@ -189,7 +236,7 @@ def stories(update: Update, context: CallbackContext) -> None:
                                       f'\n {stories_user.age} \t\t\t\t {stories_user.location} \t\t\t\t'
                                       f'{stories_user.gender}')
     elif z.gender == 'girl':
-        for stories_user in BotUser.objects.filter(gender='girl'):
+        for stories_user in BotUser.objects.filter(gender='girl').exclude(user_id=z.user_id):
             # vv = BotUser.objects.filter()
             print(stories_user)
             print(stories_user.gender)
@@ -225,32 +272,47 @@ def start_filter(update: Update, context: CallbackContext, ) -> None:
     print(z.gender)
     print(z.first_name)
     if z.gender == 'boy':  # y['gender'] this is not filter by db it's by pickle file
-        for stories_user in BotUser.objects.filter(gender='girl'):
-            # like mideregew sew
-            global too
-            to1 = stories_user.user_id
-            print(f'hhhh    {to1}')
-            too = BotUser.objects.get(user_id=to1)
-            print(f'kkkkkkk   {too}')
-            print(stories_user)
-            print(stories_user.gender)
-            update.message.reply_text(f'{stories_user.first_name}\t\t\t\t\t {stories_user.user_id} ' \
-                                      f'\n {stories_user.age} \t\t\t\t {stories_user.location} \t\t\t\t'
-                                      f'{stories_user.gender}')
-            # waiting for like or dislike then user2
-            if update.message.text == '💚':
-                print('liked')
-                # try catch to prevent duplication
-                Likes.objects.get_or_create(
-                    user_from=z,
-                    user_to=too,
-                )
-                update.message.reply_text('Liked Saved!!! ')
+        uu = BotUser.objects.filter(gender='girl')
+        u_count = uu.count()
+        update.message.reply_text(f'{u_count}  found')
+        stories_userss = []
+        for zz in range(u_count):
+            print(f' zzzz =  {zz}')
+            for stories_user in uu:
+                global too, liked
+                update.message.reply_text(f'{zz}  {stories_user}')
+                zzz = int(zz)
+                print(f'zzzzzzzzzz   {zzz}')
+                to1 = stories_user.user_id
+                print(f'hhhh    {to1}')
+                too = BotUser.objects.get(user_id=to1)
+                print(f'kkkkkkk   {too}')
+                print(stories_user)
+                print(stories_user.gender)
+                ##  if  user liked continue
+                # if too liked by current cont
+                tooo = Likess.objects.filter(user_to=stories_user)  # and userfrom  current user
+                print(f'toooooo   {tooo}')
+                print(Likess.objects.all())
+
+                update.message.reply_text(f'{stories_user.first_name}\t\t\t\t\t {stories_user.user_id} ' \
+                                          f'\n {stories_user.age} \t\t\t\t {stories_user.location} \t\t\t\t'
+                                          f'{stories_user.gender}')
+                break
+            print('bif')
+            next_user(update, context)
+            print('af')
+            break
 
         update.message.reply_text('No suitable user')
+        # waiting for like or dislike then user2
+
+        # update.message.reply_text(random.choice(stories_user))
+
+
     elif z.gender == 'girl':
         for stories_user in BotUser.objects.filter(gender='boy'):
-            print(random.Random.choice(stories_user))
+            # print(random.Random.choice(stories_user))
             # vv = BotUser.objects.filter()
             # global too
             to1 = stories_user.user_id
@@ -264,7 +326,6 @@ def start_filter(update: Update, context: CallbackContext, ) -> None:
                                       f'{stories_user.gender}')
             if update.message.text == '💚':
                 print('liked')
-
                 update.message.reply_text('Liked ')
                 break
     else:
@@ -282,8 +343,88 @@ def start_filter(update: Update, context: CallbackContext, ) -> None:
     if update.message.text == '⬅️ Back':
         print('back')
         menu(update, context)
-    else:
-        update.message.reply_text('Wrong Input ❗ press 👇👇👇')
+    """else:
+        update.message.reply_text('Wrong Input ❗ press 👇👇👇')"""
+
+
+def next_user(update: Update, context: CallbackContext):
+    x = update.message.from_user.id
+    y = context.user_data
+    z = BotUser.objects.get(user_id=x)
+    print('here nex t')  # work
+    # for ll in Likess.objects.filter(liked=False):
+    for stories_user in BotUser.objects.filter(gender='girl'):
+        print('like')
+        global too
+        to1 = stories_user.user_id
+        print(f'hhhh    {to1}')
+        too = BotUser.objects.get(user_id=to1)
+
+        mm = 2
+        for m in range(mm):
+            print(m)
+            """for ll in Likess.objects.filter(like_id=stories_user.user_id):
+
+                print('like')
+                global too
+                to1 = stories_user.user_id
+                print(f'hhhh    {to1}')
+                too = BotUser.objects.get(user_id=to1)
+
+                print(f'likeeeeeeeeeee   {ll}')
+                print(f'like tooo   {ll.user_to}')
+
+                if stories_user == ll.user_to:
+                    print('continue')
+                    update.message.reply_text(f'{stories_user.first_name}\t\t\t\t\t {stories_user.user_id} ' \
+                                              f'\n {stories_user.age} \t\t\t\t {stories_user.location} \t\t\t\t'
+                                              f'{stories_user.gender}')
+
+                else:
+                    update.message.reply_text(f'{stories_user.first_name}\t\t\t\t\t {stories_user.user_id} ' \
+                                              f'\n {stories_user.age} \t\t\t\t {stories_user.location} \t\t\t\t'
+                                              f'{stories_user.gender}')
+                    if update.message.text == '💚':
+                        print('liked')
+                        # try catch to prevent duplication
+                        Likess.objects.get_or_create(
+                            like_id=too.user_id,
+                            user_from=z,
+                            user_to=too,
+                        )
+                        update.message.reply_text('liked  user in  for  ')"""
+        else:
+         if update.message.text == '💚':
+                print('liked')
+                # try catch to prevent duplication
+                Likess.objects.get_or_create(
+                    like_id=too.user_id,
+                    user_from=z,
+                    user_to=too,
+                    liked=True,
+                )
+                BotUser.objects.filter(
+                   user_id=stories_user.user_id
+                ).update(liked_by=z.user_id)
+                update.message.reply_text('liked  user for if ')
+                for stories_user in BotUser.objects.filter(gender='girl').exclude(liked_by=z.user_id):
+                    update.message.reply_text(f'{stories_user.first_name}\t\t\t\t\t {stories_user.user_id} ' \
+                                              f'\n {stories_user.age} \t\t\t\t {stories_user.location} \t\t\t\t'
+                                              f'{stories_user.gender}       hiha')
+                    break
+         break
+        # start_filter(update, context)
+
+        """if update.message.text == '💚':
+        print('liked')
+        # try catch to prevent duplication
+        Likess.objects.get_or_create(
+            like_id=too.user_id,
+            user_from=z,
+            user_to=too,
+        )
+        update.message.reply_text('Liked Saved!!! ')
+"""
 
 
 def matches(update: Update, context: CallbackContext) -> None:
@@ -294,13 +435,13 @@ def matches(update: Update, context: CallbackContext) -> None:
     cuser = update.message.from_user.id
     x = BotUser.objects.get(user_id=cuser)
     print(x.first_name)
-    fromm = Likes.objects.filter(user_from=x)
+    fromm = Likess.objects.filter(user_from=x)
     print(fromm)
     # print(fromm.user_to)
     # print(fromm.user_from.user_id)
-    for m in Likes.objects.filter(user_to=x):
+    for m in Likess.objects.filter(user_to=x):
         print(m.user_from.first_name)
-        for vv in Likes.objects.filter(user_from=x):
+        for vv in Likess.objects.filter(user_from=x):
             print(vv.user_to.first_name)
             print(vv.user_to.user_id)
             if vv.user_to.user_id == m.user_from.user_id:
@@ -318,29 +459,30 @@ def matches(update: Update, context: CallbackContext) -> None:
 
 
 def likes_you_keybord(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text('This Likes You page is under construction')
-    keyboard = [['⏪', '⏩ '],
+    update.message.reply_text('Likes You ')
+    keyboard = [['⏪', '⏩'],
                 ['⬅️ Back'], ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    update.message.reply_text('This Start is under construction 👇', reply_markup=reply_markup)
+    update.message.reply_text('This Likes You  is under construction 👇', reply_markup=reply_markup)
     likes_you(update, context)
 
 
 def likes_you(update: Update, context: CallbackContext) -> None:
-    if update.message.text == '⏩ ':
-        like = Likes.objects.all()
+    if update.message.text == '⏩':
+        update.message.reply_text('what happen  ')
+        like = Likess.objects.all()
         if like:  # not used
             user = update.message.from_user.id
             x = BotUser.objects.get(user_id=user)
             print(x.first_name)
 
-            for l in Likes.objects.filter(user_to=x):
+            for l in Likess.objects.filter(user_to=x):
                 print(l)
                 print(l.user_from.first_name)
                 update.message.reply_text(f'this user like you \n {l.user_from.first_name}, {l.user_from.user_id}')
                 # fromm = Likes.objects.filter(user_from=l.user_from)
                 # print(fromm.user_from)
-                if update.message.text == '⏩ ':
+                if update.message.text == '⏩':
                     pass
                 else:
                     print('⏩ jj')
@@ -353,8 +495,8 @@ def likes_you(update: Update, context: CallbackContext) -> None:
         if update.message.text == '⬅️ Back':
             print('back')
             menu(update, context)
-        else:
-            update.message.reply_text('Wrong Input ❗ press 👇👇👇')
+    else:
+        update.message.reply_text('Wrong Input ❗ press 👇👇👇')
 
 
 def setting(update: Update, context: CallbackContext) -> None:
@@ -378,6 +520,7 @@ def setting(update: Update, context: CallbackContext) -> None:
 
     elif update.message.text == '🔍 Search settings':
         update.message.reply_text('Wait for moment please')
+        reff(update, context)
     elif update.message.text == '⬅️ Back':
         print('back')
         menu(update, context)
@@ -404,6 +547,16 @@ def profile(update: Update, context: CallbackContext) -> None:
 
 def cancel_menu(update: Update, context: CallbackContext) -> None:
     update.message.reply_text('menu removed', reply_markup=ReplyKeyboardRemove(), )
+
+
+def reff(update: Update, context: CallbackContext) -> None:
+    user = update.message.from_user.id
+    update.message.reply_text(user)
+    """Send a deep-linked URL when the command /start is issued."""
+    bot = context.bot
+    url = helpers.create_deep_linked_url(bot.username, str(user))
+    text = "Feel free to tell your friends about it:\n\n" + url
+    update.message.reply_text(text)
 
 
 def home_select(update: Update, context: CallbackContext):
@@ -443,6 +596,7 @@ def main() -> None:
             AGE: [MessageHandler(Filters.regex('^(1[89]|[2-9][0-9])$') & ~Filters.command, age)],
             # filter (^(0-9) only number   r'\d+',^([2-9]\d|[1-9])$
             LOCATION: [MessageHandler(Filters.text & ~Filters.command, location)],
+            LOCATION2: [MessageHandler(Filters.regex(r'\d+'), location2)],
             PHONE: [MessageHandler(Filters.contact, phone)]
         },
         fallbacks=[CommandHandler('cancel', cancel)],  # it may useful for onetime
@@ -474,9 +628,11 @@ def main() -> None:
         fallbacks=[],
     )
     """
+    # dispatcher.add_handler(MessageHandler(Filters.regex(r'\d+'), inp_location))
     dispatcher.add_handler(MessageHandler(Filters.text(setting_keyboardd), setting))
     dispatcher.add_handler(MessageHandler(Filters.text(home_sel), home_select))
-    dispatcher.add_handler(MessageHandler(Filters.text(start_f), start_filter))
+    # dispatcher.add_handler(MessageHandler(Filters.text(start_f), start_filter))
+    dispatcher.add_handler(MessageHandler(Filters.text(start_f), next_user))
     dispatcher.add_handler(MessageHandler(Filters.text(likes_y), likes_you))
     # dispatcher.add_handler(MessageHandler(Filters.regex('^(\U00002747 Start ✳️|Settings)$'), home_select))
     # dispatcher.add_handler(MessageHandler(Filters.all, setting))

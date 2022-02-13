@@ -32,21 +32,26 @@ class BotUser(models.Model):
     #####
     age = models.IntegerField()
     gender = models.CharField(max_length=20)
-    location = models.CharField(max_length=33)
+    location = models.CharField(max_length=60)
     phone = models.CharField(max_length=15)
 
+    liked = models.BooleanField(default=False)
+    liked_by = models.IntegerField(default=0)
     """user_model = get_user_model()
     user_model.add_to_class('following',models.ManyToManyField('self',
                                                        through=Likes,
                                        related_name='followers',symmetrical=False))"""
+
     def __str__(self):
-     return str(self.user_id)
+        return str(self.user_id)
 
 
-class Likes(models.Model):
+class Likess(models.Model):
+    like_id =  models.IntegerField(primary_key=True)
     user_from = models.ForeignKey(BotUser, related_name='rel_from_set', on_delete=models.CASCADE)
     user_to = models.ForeignKey(BotUser, related_name='rel_to_set', on_delete=models.CASCADE)
     like = models.ManyToManyField(BotUser)
+    liked = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
